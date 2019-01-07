@@ -24,7 +24,7 @@ K.set_image_dim_ordering('tf')
 
 
 IMG_SIZE = 64 #Sets the pixel length and height for all images
-class_column = 1 #Determines which column in the attribute_list.csv file is to be examined. E.g. 1 for hair colour, 2 for eyeglasses
+class_column = 5 #Determines which column in the attribute_list.csv file is to be examined. E.g. 1 for hair colour, 2 for eyeglasses
 LR = 1e-3
 
 datasetDirectory = './faces' 
@@ -173,7 +173,7 @@ Declares callback to implement early stopping
 """
 earlyStopping = keras.callbacks.EarlyStopping(monitor='val_loss',
                               min_delta=0,
-                              patience=2,
+                              patience=0,
                               verbose=0, mode='auto')
 
 
@@ -205,7 +205,7 @@ labels = []
 Appends all testlabels to a list
 """
 for i in testLabels:
-    labels.append(np.argmax(i))
+    labels.append(np.argmax(i)) 
 
 """
 Appends both the test filenames and the rounded predictions to an array so we can see what each
@@ -214,6 +214,24 @@ image has been predicted as.
 for i in range(len(test_data)):
     filepredictions.append([testNum[i]+'.png', rounded_predictions[i]])
 filepredictions.sort(key=lambda x: int(os.path.splitext(x[0])[0]))
+
+# Plot training & validation accuracy values
+plt.plot(history.history['acc'])
+plt.plot(history.history['val_acc'])
+plt.title('CNN Model Accuracy for Cartoon vs. Human with early stopping and dropout')
+plt.ylabel('Accuracy')
+plt.xlabel('Epoch')
+plt.legend(['Cross-validaion score', 'Training'], loc='bottom right')
+plt.show()
+
+# Plot training & validation loss values
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('Model loss for Cartoon vs. Human without early stopping and dropout')
+plt.ylabel('Loss')
+plt.xlabel('Epoch')
+plt.legend(['Cross-validaion score', 'Training'], loc='upper left')
+plt.show()
 
 """
 Creates a confusion matrix for the test data
