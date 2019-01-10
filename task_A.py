@@ -2,7 +2,7 @@ import cv2
 import os
 import csv
 
-datasetDirectory = './Assignment'
+datasetDirectory = './dataset'
 faceDirectory = './faces'
 noiseDirectory = './noise'
 csvData = []
