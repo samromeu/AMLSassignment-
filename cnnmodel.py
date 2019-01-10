@@ -13,6 +13,7 @@ import csv
 import itertools
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
 import keras
 from keras import backend as K
 from keras.models import Sequential
@@ -31,6 +32,7 @@ datasetDirectory = './faces'
 TRAIN_DIR = './training'
 validationDirectory = './validation'
 TEST_DIR = './testing'
+NEWTEST_DIR = './newtraining'
 
 """
 This section of if statements prepares the respective labels for the confusion matrix depending on which 
@@ -115,9 +117,23 @@ def load_test_data():
     shuffle(test_data)
     return test_data
 
+def load_newtest_data():
+    test_data = []
+    for img in tqdm(os.listdir(NEWTEST_DIR)):
+        label = label_img(img, class_column, class_type)
+        path = os.path.join(NEWTEST_DIR, img)
+        img_num = img.split('.')[0]
+        img = cv2.imread(path)
+        img = cv2.resize(img, (IMG_SIZE,IMG_SIZE))
+        test_data.append([np.array(img), label, img_num])
+        
+    shuffle(test_data)
+    return test_data
+
 
 train_data = load_training_data() #Loads training data
 test_data = load_test_data() #Loads testing data
+new_test_data = load_newtest_data()
 
 trainImages = np.array([i[0] for i in train_data]).reshape(-1, IMG_SIZE, IMG_SIZE, 3) #Reshapes training image data to 1D vector and appends to an array
 trainLabels = np.array([i[1] for i in train_data]) #Appends training labels to an array
@@ -126,6 +142,9 @@ testImages = np.array([i[0] for i in test_data]).reshape(-1, IMG_SIZE, IMG_SIZE,
 testLabels = np.array([i[1] for i in test_data]) #Appends training labels to an array
 testNum = np.array([i[2] for i in test_data]) #Appends filename to an array
 
+newtestImages = np.array([i[0] for i in new_test_data]).reshape(-1, IMG_SIZE, IMG_SIZE, 3) #Reshapes testing image data to 1D vector and appends to an array
+newtestLabels = np.array([i[1] for i in new_test_data]) #Appends training labels to an array
+newtestNum = np.array([i[2] for i in new_test_data]) #Appends filename to an array
 
 """
 Build CNN model used for image classification. All individual layers are commented and an explanation
@@ -173,7 +192,7 @@ Declares callback to implement early stopping
 """
 earlyStopping = keras.callbacks.EarlyStopping(monitor='val_loss',
                               min_delta=0,
-                              patience=0,
+                              patience=1,
                               verbose=0, mode='auto')
 
 
@@ -186,7 +205,7 @@ cnn_model = cnn_model(class_type)
 Fits the model using the training data with a validation split of 20%, a batch size of 50 and 5 epochs
 """
 history = cnn_model.fit(trainImages, trainLabels, validation_split=0.2, batch_size = 50,
-                        epochs = 5, verbose = 1, callbacks = [earlyStopping])
+                        epochs = 5, verbose = 1)
 
 """
 Evaluates the model using test data and returns loss and accuracy
@@ -211,9 +230,12 @@ for i in testLabels:
 Appends both the test filenames and the rounded predictions to an array so we can see what each
 image has been predicted as.
 """    
-for i in range(len(test_data)):
-    filepredictions.append([testNum[i]+'.png', rounded_predictions[i]])
+for i in range(len(new_test_data)):
+    filepredictions.append([newtestNum[i]+'.png', rounded_predictions[i]])
 filepredictions.sort(key=lambda x: int(os.path.splitext(x[0])[0]))
+
+print(classification_report(labels, rounded_predictions, target_names=classes))
+print("File predictions", filepredictions)
 
 # Plot training & validation accuracy values
 plt.plot(history.history['acc'])
@@ -237,6 +259,7 @@ plt.show()
 Creates a confusion matrix for the test data
 """
 cm = confusion_matrix(labels, rounded_predictions)
+print(cm, classes)
 
 """
 Function obtained from sklearn's website used to plot a confusion matrix
