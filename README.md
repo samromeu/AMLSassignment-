@@ -1,4 +1,4 @@
-First of all, all .py files should be placed inide the same folder.
+First of all, all .py files should be placed inide the same folder, as well as the 'attribute_list.csv' file.
 Next, four empty folders called 'testing', 'training', 'noise' and 'faces' should be created. The folder containing the original 5000 images should be in a folder called 'dataset'.
 Then, run task_A.py, which will iterate through images in the dataset and place the images containing faces in the 'faces' folder and the noisy images in the 'noise' folder.
 Next, run splitData.py, which will divide the data into training and testing, 80% and 20% respectively.
@@ -6,3 +6,5 @@ From here, you can run either the cnnmodel or the svmmodel, making sure to chang
 The predictions and classification report printed will be of the test set conatining 20% of the 'faces' images, and had nothing to do with the training of the model. 
 FOR THE SVM MODEL
 The training curve is plotted by training the model a second time. If you wish to do so, uncomment line 129 in the SVM model.
+
+The 'taskAaccuracy.py' file can be run after 'task_A.py' in order to obtain the accuracy, sensitivity, specificity, PPV and NPV of the noise removal from task_A. 
